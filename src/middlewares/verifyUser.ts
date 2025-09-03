@@ -5,8 +5,12 @@ const updateDataSchema = Joi.object({
   name: Joi.string().optional(),
   email: Joi.string().email().optional(), // Ensure valid email for updates
   password: Joi.string().min(3).alphanum().optional(),
-  role: Joi.string().valid("ADMIN", "STAFF").optional(),
-  picture: Joi.allow().optional(),
+  phone: Joi.number().optional().min(10).messages({
+    "string.integer": "Informasi kontak harus berupa angka",
+    "string.max": "Informasi kontak harus melebihi 10 karakter",
+  }), 
+  role: Joi.string().valid("OWNER", "SOCIETY").optional(),
+  profile_picture: Joi.allow().optional(),
   user: Joi.optional(),
 });
 
@@ -19,8 +23,14 @@ const addDataSchema = Joi.object({
   name: Joi.string().required(),
   email: Joi.string().email().required(), // Add email validation
   password: Joi.string().min(3).required(), // Enforce minimum length for consistency
-  role: Joi.string().valid("ADMIN", "STAFF").required(),
-  picture: Joi.allow().optional(),
+  phone: Joi.number().required().min(10).messages({
+    "string.integer": "Informasi kontak harus berupa angka",
+    "string.empty": "Informasi kontak wajib diisi",
+    "string.max": "Informasi kontak harus melebihi 10 karakter",
+    "any.required": "Informasi kontak wajib diisi",
+  }),
+  role: Joi.string().valid("OWNER", "SOCIETY").required(),
+  profile_picture: Joi.allow().optional(),
   user: Joi.optional(),
 });
 

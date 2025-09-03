@@ -3,20 +3,17 @@ dotenv.config();
 
 import express from "express";
 import cors from "cors";
-import userR from "./routers/userR";
-import newsR from "./routers/newsR";
-import schoolInfoR from "./routers/schoolInfoR";
-import teacherR from "./routers/teacherR";
-import testimonyR from "./routers/testimonyR";
-import achievementR from "./routers/achievementR";
-import eventR from "./routers/eventR";
-import schoolActivityR from "./routers/schoolActivityR";
-import ppdbR from "./routers/PpdbR";
+import userR from "./routers/userR"
+import kosR from "./routers/kosR"
+import kosImageR from "./routers/Kos-ImageR"
+import kosFacilityR from "./routers/Kos-FacilityR"
+import kosReviewR from "./routers/Kos-ReviewR"
+import kosBookingR from "./routers/Kos-BookingR"
 import path from "path";
 import logger from "./utils/logger";
 import { errorHandler } from "./middlewares/errorHandler";
 
-const PORT: number = 9000;
+const PORT: number = 7000;
 const app = express();
 
 // Middleware untuk mencegah permintaan berulang
@@ -59,14 +56,12 @@ app.use(
 app.use(express.static(path.join(__dirname, "..", "public")));
 
 app.use(`/user`, userR);
-app.use(`/news`, newsR);
-app.use(`/school-info`, schoolInfoR);
-app.use(`/teacher`, teacherR);
-app.use(`/testimony`, testimonyR);
-app.use(`/achievement`, achievementR);
-app.use(`/event`, eventR);
-app.use(`/school-activity`, schoolActivityR);
-app.use(`/ppdb`, ppdbR);
+app.use(`/kos`, kosR);
+app.use(`/kosImage`, kosImageR);
+app.use(`/kosFacility`, kosFacilityR);
+app.use(`/kosReview`, kosReviewR);
+app.use(`/kosBooking`, kosBookingR);
+
 
 app.use(errorHandler);
 

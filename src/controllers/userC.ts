@@ -12,7 +12,7 @@ const prisma = new PrismaClient({ errorFormat: "pretty" });
 
 export const createUser = async (request: Request, response: Response) => {
   try {
-    const { name, email, password, role } = request.body;
+    const { name, email, password,phone, role } = request.body;
     const uuid = uuidv4();
     let filename = request.file ? path.basename(request.file.path) : "";
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -23,6 +23,7 @@ export const createUser = async (request: Request, response: Response) => {
         name,
         email,
         password: hashedPassword,
+        phone,
         role,
         profile_picture: filename,
       },
@@ -57,7 +58,7 @@ export const createUser = async (request: Request, response: Response) => {
 export const updateUser = async (request: Request, response: Response) => {
   try {
     const { id } = request.params;
-    const { name, email, password, role } = request.body;
+    const { name, email, password,phone, role } = request.body;
 
     const findUser = await prisma.user.findFirst({
       where: { id: Number(id) },
@@ -86,6 +87,7 @@ export const updateUser = async (request: Request, response: Response) => {
         name: name || findUser.name,
         email: email || findUser.email,
         password: hashedPassword,
+        phone: phone || findUser.phone,
         role: role || findUser.role,
         profile_picture: filename,
       },
@@ -127,6 +129,7 @@ export const authentication = async (request: Request, response: Response) => {
       id: user.id,
       name: user.name,
       email: user.email,
+      phone: user.phone,
       role: user.role,
     };
 
@@ -288,6 +291,28 @@ export const getProfile = async (request: Request, response: Response) => {
       .json({
         status: false,
         message: `Terjadi sebuah kesalahan: ${error.message}`,
+      })
+      .status(400);
+  }
+};
+
+ export const getUserbyId = async (request: Request, response: Response) => {
+  try {
+    const { id } = request.params;
+    const getUser = await prisma.user.findFirst({ where: { id: Number(id) } });
+    return response
+      .json({
+        status: true,
+        data: getUser,
+        message: `User with id ${id} has been retrieved`,
+      })
+      .status(200);
+  } catch (error: any) {
+    logger.error(`Failed to retrieve user: ${error.message}`);
+    return response
+      .json({
+        status: false,
+        message: `There is an error: ${error.message}`,
       })
       .status(400);
   }

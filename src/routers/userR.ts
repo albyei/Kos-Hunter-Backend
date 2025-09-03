@@ -8,13 +8,14 @@ import {
   getAlluser,
   updateUser,
   getProfile,
+  getUserbyId,
 } from "../controllers/userC";
 import {
   verifyAddUser,
   verifyAuthentification,
   verifyUpdateUser,
 } from "../middlewares/verifyUser";
-import uploadFileUser from "../middlewares/userUpload";
+import uploadFileUser from "../middlewares/uploadUser";
 import { verifyToken, verifyRole } from "../middlewares/authorization";
 
 const router = Router();
@@ -29,11 +30,25 @@ const loginLimiter = rateLimit({
 });
 
 router.get(`/`, getAlluser);
-router.post(`/create`, [uploadFileUser.single("picture"), verifyAddUser], createUser);
-router.put(`/:id`, [verifyToken, verifyRole(["ADMIN"]), uploadFileUser.single("picture"), verifyUpdateUser], updateUser);
+router.post(
+  `/create`,
+  [uploadFileUser.single("picture"), verifyAddUser],
+  createUser
+);
+router.put(
+  `/:id`,
+  [
+    verifyToken,
+    verifyRole(["OWNER"]),
+    uploadFileUser.single("picture"),
+    verifyUpdateUser,
+  ],
+  updateUser
+);
 router.post(`/login`, [loginLimiter, verifyAuthentification], authentication);
 router.put(`/pic/:id`, [uploadFileUser.single("picture")], changeProfile);
 router.delete(`/:id`, deleteUser);
+router.get(`/profile/:id`, getUserbyId);
 router.get(`/profile`, verifyToken, getProfile);
 
 export default router;

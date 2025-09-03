@@ -14,119 +14,117 @@ datasource db {
 }
 
 enum Role {
-  ADMIN
-  STAFF
+  OWNER
+  SOCIETY
 }
 
-enum Major {
-  RPL
-  TKJ
-  PG
+enum Gender {
+  MALE
+  FEMALE
+  ALL
 }
 
-enum AchievementCategory {
-  ACADEMIC
-  SPORTS
-  ARTS
+enum BookingStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  CANCELLED
 }
 
 model User {
   id              Int      @id @default(autoincrement())
-  uuid            String   @default("")
+  uuid            String   @unique @default(uuid())
   name            String   @db.VarChar(255)
   email           String   @unique @db.VarChar(255)
-  password        String   @db.VarChar(255) // Hashed password
+  password        String   @db.VarChar(255) // Hashed password 
   profile_picture String?  @db.VarChar(255)
-  role            Role     @default(ADMIN)
+  phone           String?  @db.VarChar(20) // Limited to 20 chars for phone 
+  role            Role     @default(SOCIETY)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
-  news            News[]   @relation("NewsAuthor")
+  reviews         Review[] @relation("UserReviews")
+  bookings        Book[]   @relation("UserBookings")
+  kos             Kos[]    @relation("OwnerKos")
+
+  @@index([email])
+  @@index([role])
 }
 
-model News {
+model Kos {
+  id            Int           @id @default(autoincrement())
+  uuid          String        @unique @default(uuid())
+  ownerId       Int
+  name          String        @db.VarChar(255)
+  address       String        @db.Text
+  description   String?       @db.Text // Added d escription 
+  pricePerMonth Int           @default(0)
+  gender        Gender
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  owner         User          @relation("OwnerKos", fields: [ownerId], references: [id], onDelete: Cascade)
+  images        KosImage[]
+  facilities    KosFacility[]
+  reviews       Review[]      @relation("KosReviews")
+  bookings      Book[]        @relation("KosBookings")
+
+  @@index([ownerId])
+  @@index([gender])
+}
+
+model KosImage {
+  id            Int           @id @default(autoincrement())
+  uuid      String   @unique @default(uuid())
+  kosId     Int
+  image     String   @db.VarChar(255)
+  kos       Kos      @relation(fields: [kosId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([kosId])
+}
+
+model KosFacility {
   id        Int      @id @default(autoincrement())
   uuid      String   @unique @default("")
-  title     String   @db.VarChar(255)
-  content   String   @db.Text
-  date      DateTime @default(now())
-  image     String?  @db.VarChar(255) // URL ke cloud storage
-  authorId  Int?
-  author    User?    @relation("NewsAuthor", fields: [authorId], references: [id])
+  kosId     Int
+  facility  String   @db.VarChar(100)
+  kos       Kos      @relation(fields: [kosId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([kosId])
 }
 
-model Achievement {
-  id          Int                  @id @default(autoincrement())
-  uuid        String               @unique @default("")
-  studentName String               @db.VarChar(255)
-  title       String               @db.VarChar(255)
-  description String?              @db.Text
-  date        DateTime             @default(now())
-  category    AchievementCategory?
-  image       String?              @db.VarChar(255)
-  createdAt   DateTime             @default(now())
-  updatedAt   DateTime             @updatedAt
-}
-
-model SchoolInfo {
-  id            Int      @id @default(autoincrement())
-  totalStudents Int      @default(0)
-  major         Major?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-}
-
-model Event {
-  id          Int      @id @default(autoincrement())
-  title       String   @db.VarChar(255)
-  date        DateTime @default(now())
-  location    String?  @db.VarChar(255)
-  description String?  @db.Text
-  image       String?  @db.VarChar(255)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
-model Testimony {
-  id             Int      @id @default(autoincrement())
-  alumniName     String   @db.VarChar(255)
-  testimony      String   @db.Text
-  graduationYear Int?
-  photo          String?  @db.VarChar(255)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-}
-
-model Teacher {
+model Review {
   id        Int      @id @default(autoincrement())
-  name      String   @db.VarChar(255)
-  photo     String?  @db.VarChar(255)
-  subject   String?  @db.VarChar(255)
+  uuid      String   @unique @default("")
+  kosId     Int
+  userId    Int
+  rating    Int      @default(0)
+  comment   String   @db.Text
+  kos       Kos      @relation("KosReviews", fields: [kosId], references: [id], onDelete: Cascade)
+  user      User     @relation("UserReviews", fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([kosId])
+  @@index([userId])
 }
 
-model SchoolActivity {
-  id          Int      @id @default(autoincrement())
-  title       String   @db.VarChar(255)
-  description String?  @db.Text
-  date        DateTime @default(now())
-  media       String?  @db.VarChar(255)
-  image       String?  @db.VarChar(255) // Misalnya "image", "video"
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
+model Book {
+  id        Int           @id @default(autoincrement())
+  uuid      String        @unique @default("")
+  kosId     Int
+  userId    Int
+  startDate DateTime      @db.Date
+  endDate   DateTime      @db.Date
+  status    BookingStatus @default(PENDING)
+  kos       Kos           @relation("KosBookings", fields: [kosId], references: [id], onDelete: Cascade)
+  user      User          @relation("UserBookings", fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
 
-model PPDB {
-  id          Int      @id @default(autoincrement())
-  uuid        String   @unique @default(uuid())
-  title       String   @db.VarChar(255)
-  description String   @db.Text
-  startDate   DateTime @default(now())
-  endDate     DateTime @default(now())
-  contactInfo String?  @db.VarChar(255)
-  document    String?  @db.VarChar(255)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  @@index([kosId])
+  @@index([userId])
+  @@index([status])
 }
