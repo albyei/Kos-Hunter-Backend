@@ -8,12 +8,12 @@ const router = Router();
 
 router.post(
   "/facility",
-  [verifyToken, verifyRole(["OWNER"]), uploadFormData, verifyCreateKosFacility],
+  [verifyToken, verifyRole(["OWNER"]),uploadFormData, verifyCreateKosFacility],
   createKosFacility
 );
 router.put(
   "/:id",
-  [verifyToken, verifyRole(["OWNER"]), uploadFormData, verifyUpdateKosFacility],
+  [verifyToken, verifyRole(["OWNER"]),uploadFormData, verifyUpdateKosFacility],
   updateKosFacility
 );
 router.delete(

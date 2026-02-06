@@ -80,7 +80,7 @@ const bookingHistoryQuerySchema = Joi.object({
     .messages({
       "date.base": "End date must be a valid ISO date",
     }),
-}).xor("month", "startDate"); // Hanya salah satu dari month atau startDate
+}).or("month", "startDate", "year"); // Hanya salah satu dari month atau startDate
 
 export const verifyCreateBooking = (
   req: Request,

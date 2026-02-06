@@ -12,3 +12,14 @@ declare module "express-serve-static-core" {
     };
   }
 }
+export interface AuthenticatedRequest extends Request {
+  user?: {
+    id: number;
+    name: string;
+    email: string;
+    role: string;
+    iat?: number;
+    exp?: number;
+  };
+  files?: Multer.File[] | { [fieldname: string]: Multer.File[] };
+}

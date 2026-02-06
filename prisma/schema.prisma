@@ -45,6 +45,7 @@ model User {
   reviews         Review[] @relation("UserReviews")
   bookings        Book[]   @relation("UserBookings")
   kos             Kos[]    @relation("OwnerKos")
+  replies        Review[] @relation("OwnerReplies")
 
   @@index([email])
   @@index([role])
@@ -85,7 +86,7 @@ model KosImage {
 
 model KosFacility {
   id        Int      @id @default(autoincrement())
-  uuid      String   @unique @default("")
+  uuid      String   @unique @default(uuid())
   kosId     Int
   facility  String   @db.VarChar(100)
   kos       Kos      @relation(fields: [kosId], references: [id], onDelete: Cascade)
@@ -97,23 +98,27 @@ model KosFacility {
 
 model Review {
   id        Int      @id @default(autoincrement())
-  uuid      String   @unique @default("")
+  uuid      String   @unique @default(uuid())
   kosId     Int
   userId    Int
   rating    Int      @default(0)
   comment   String   @db.Text
+  reply_comment String?  @db.Text
+  repliedById  Int?     // ID of the owner who replied
   kos       Kos      @relation("KosReviews", fields: [kosId], references: [id], onDelete: Cascade)
   user      User     @relation("UserReviews", fields: [userId], references: [id], onDelete: Cascade)
+  repliedBy User?    @relation("OwnerReplies", fields: [repliedById], references: [id], onDelete: SetNull)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([kosId])
   @@index([userId])
+  @@index([repliedById]) 
 }
 
 model Book {
   id        Int           @id @default(autoincrement())
-  uuid      String        @unique @default("")
+  uuid      String        @unique @default(uuid())
   kosId     Int
   userId    Int
   startDate DateTime      @db.Date

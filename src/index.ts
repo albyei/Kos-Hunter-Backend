@@ -65,6 +65,10 @@ app.use(`/kosBooking`, kosBookingR);
 
 app.use(errorHandler);
 
-app.listen(PORT, () => {
-  logger.info(`[Server]: Server berjalan di http://localhost:${PORT}`);
-});
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, () => {
+    logger.info(`[Server]: Server berjalan di http://localhost:${PORT}`);
+  });
+}
+
+export default app;

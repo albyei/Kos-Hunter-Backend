@@ -5,6 +5,8 @@ import {
   deleteBooking,
   getBookingById,
   getBookingsByOwner,
+  generateBookingNota,
+  getBookingsBySociety,
 } from "../controllers/kosBookingC";
 import { verifyToken, verifyRole } from "../middlewares/authorization";
 import uploadFormData from "../middlewares/uploadFormData";
@@ -51,6 +53,17 @@ router.get(
   "/",
   [verifyToken, verifyRole(["OWNER"]), verifyGetBookingHistory],
   getBookingsByOwner
+);
+
+router.get(
+  "/:id/nota",
+  [verifyToken, verifyRole(["SOCIETY"]), verifyGetBookingById],
+  generateBookingNota
+);
+router.get(
+  "/my-bookings",
+  [verifyToken, verifyRole(["SOCIETY"]), verifyGetBookingHistory],  // Reuse middleware
+  getBookingsBySociety
 );
 
 export default router;

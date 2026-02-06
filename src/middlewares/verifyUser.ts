@@ -4,11 +4,11 @@ import Joi from "joi";
 const updateDataSchema = Joi.object({
   name: Joi.string().optional(),
   email: Joi.string().email().optional(), // Ensure valid email for updates
-  password: Joi.string().min(3).alphanum().optional(),
+  password: Joi.string().min(7).alphanum().optional(),
   phone: Joi.number().optional().min(10).messages({
     "string.integer": "Informasi kontak harus berupa angka",
     "string.max": "Informasi kontak harus melebihi 10 karakter",
-  }), 
+  }),
   role: Joi.string().valid("OWNER", "SOCIETY").optional(),
   profile_picture: Joi.allow().optional(),
   user: Joi.optional(),
@@ -16,13 +16,13 @@ const updateDataSchema = Joi.object({
 
 const authSchema = Joi.object({
   email: Joi.string().email().required(),
-  password: Joi.string().min(3).alphanum().required(),
+  password: Joi.string().min(7).alphanum().required(),
 });
 
 const addDataSchema = Joi.object({
   name: Joi.string().required(),
   email: Joi.string().email().required(), // Add email validation
-  password: Joi.string().min(3).required(), // Enforce minimum length for consistency
+  password: Joi.string().min(7).required(), // Enforce minimum length for consistency
   phone: Joi.number().required().min(10).messages({
     "string.integer": "Informasi kontak harus berupa angka",
     "string.empty": "Informasi kontak wajib diisi",
@@ -55,7 +55,7 @@ export const verifyUpdateUser = (
 export const verifyAuthentification = (
   request: Request,
   response: Response,
-  next: NextFunction      
+  next: NextFunction
 ) => {
   const { error } = authSchema.validate(request.body, { abortEarly: false });
 

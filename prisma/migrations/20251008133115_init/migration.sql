@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `book` ALTER COLUMN `uuid` DROP DEFAULT;

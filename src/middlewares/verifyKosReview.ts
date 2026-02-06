@@ -41,11 +41,23 @@ const reviewIdSchema = Joi.object({
     "number.positive": "Review ID must be a positive number",
     "any.required": "Review ID is required",
   }),
-})
+});
 
+const replyReviewSchema = Joi.object({
+  reply_comment: Joi.string().trim().optional().messages({
+    "string.base": "Reply comment must be a string",
+    "string.empty": "Reply comment cannot be an empty string if provided",
+  }),
+}).min(1); // Minimal satu field jika update
 
-export const verifyCreateReview = (req: Request, res: Response, next: NextFunction) => {
-  const { error } = createReviewSchema.validate(req.body, { abortEarly: false });
+export const verifyCreateReview = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { error } = createReviewSchema.validate(req.body, {
+    abortEarly: false,
+  });
   if (error) {
     return res.status(400).json({
       status: false,
@@ -55,15 +67,23 @@ export const verifyCreateReview = (req: Request, res: Response, next: NextFuncti
   return next();
 };
 
-export const verifyUpdateReview = (req: Request, res: Response, next: NextFunction) => {
-  const { error: paramError } = updateReviewSchema.validate(req.body, { abortEarly: false });
+export const verifyUpdateReview = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { error: paramError } = updateReviewSchema.validate(req.body, {
+    abortEarly: false,
+  });
   if (paramError) {
     return res.status(400).json({
       status: false,
       message: paramError.details.map((it) => it.message).join(", "),
     });
   }
-const {error: bodyError} = updateReviewSchema.validate(req.body, { abortEarly: false });
+  const { error: bodyError } = updateReviewSchema.validate(req.body, {
+    abortEarly: false,
+  });
   if (bodyError) {
     return res.status(400).json({
       status: false,
@@ -74,7 +94,11 @@ const {error: bodyError} = updateReviewSchema.validate(req.body, { abortEarly: f
   return next();
 };
 
-export const verifyDeleteReview = (req: Request, res: Response, next: NextFunction) => {
+export const verifyDeleteReview = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const { error } = reviewIdSchema.validate(req.params, { abortEarly: false });
   if (error) {
     return res.status(400).json({
@@ -82,5 +106,33 @@ export const verifyDeleteReview = (req: Request, res: Response, next: NextFuncti
       message: error.details.map((it) => it.message).join(", "),
     });
   }
+  return next();
+};
+
+export const verifyReplyReview = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { error: paramError } = reviewIdSchema.validate(req.params, {
+    abortEarly: false,
+  });
+  if (paramError) {
+    return res.status(400).json({
+      status: false,
+      message: paramError.details.map((it) => it.message).join(", "),
+    });
+  }
+
+  const { error: bodyError } = replyReviewSchema.validate(req.body, {
+    abortEarly: false,
+  });
+  if (bodyError) {
+    return res.status(400).json({
+      status: false,
+      message: bodyError.details.map((it) => it.message).join(", "),
+    });
+  }
+
   return next();
 };

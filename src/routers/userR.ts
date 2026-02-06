@@ -21,11 +21,26 @@ import { verifyToken, verifyRole } from "../middlewares/authorization";
 const router = Router();
 
 const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 menit
-  max: 5, // Maksimal 5 percobaan login per IP
-  message: {
-    status: false,
-    message: "Too many login attempts, please try again after 15 minutes",
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  skipSuccessfulRequests: true, // reset jika login sukses
+  keyGenerator: (req) => {
+    const email = (req.body.email || "").toLowerCase().trim();
+    const ip =
+      req.headers["x-forwarded-for"]?.toString().split(",")[0].trim() ||
+      req.ip ||
+      req.socket.remoteAddress ||
+      "";
+    return email ? `${email}:${ip}` : ip;
+  },
+  handler: (req, res) => {
+    const email = req.body.email || "unknown";
+    res.status(429).json({
+      status: false,
+      message: `Terlalu banyak percobaan login untuk ${email}. Coba lagi setelah 15 menit.`,
+    });
   },
 });
 

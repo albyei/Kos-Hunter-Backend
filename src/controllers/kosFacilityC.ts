@@ -1,10 +1,7 @@
 import { Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
 import { v4 as uuidv4 } from "uuid";
-import path from "path";
-import fs from "fs";
 import logger from "../utils/logger";
-import { BASE_URL } from "../global";
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -25,6 +22,28 @@ export const createKosFacility = async (
 ) => {
   try {
     const { kosId, facility } = request.body;
+    const ownerId = request.user?.id;
+    if (!ownerId) {
+      return response
+        .status(401)
+        .json({ status: false, message: "Unauthorized: No user ID provided" });
+    }
+
+    if (!kosId || !facility) {
+      return response
+        .status(400)
+        .json({ status: false, message: "Missing required fields" });
+    }
+
+    const kos = await prisma.kos.findUnique({ where: { id: parseInt(kosId) } });
+    if (!kos || kos.ownerId !== ownerId) {
+      return response
+        .status(403)
+        .json({
+          status: false,
+          message: "Forbidden: Invalid kos or not owner",
+        });
+    }
 
     const newFacility = await prisma.kosFacility.create({
       data: {
@@ -75,7 +94,7 @@ export const updateKosFacility = async (
         kosId: parseInt(kosId),
         facility: facility.trim(),
       },
-    });    
+    });
 
     logger.info(`Kos facility updated for kos ID ${kosId}`);
     return response.status(200).json({
